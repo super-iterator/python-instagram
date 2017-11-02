@@ -65,7 +65,9 @@ def bind_method(**config):
             self.return_json = kwargs.pop("return_json", False)
             self.max_pages = kwargs.pop("max_pages", 3)
             self.with_next_url = kwargs.pop("with_next_url", None)
-            self.parameters = {}
+            self.parameters = {
+                # 'access_token' : "7abed4f84bdc496c89b384bc39c1928b"
+            }
             self._build_parameters(args, kwargs)
             self._build_path()
 
@@ -103,7 +105,8 @@ def bind_method(**config):
                 self.path = self.path.replace(variable, value)
 
             if self.api.format and not self.exclude_format:
-                self.path = self.path + '.%s' % self.api.format
+                # self.path = self.path + '.%s' % self.api.format
+                self.path = self.path +'/'
 
         def _build_pagination_info(self, content_obj):
             """Extract pagination information in the desired format."""
@@ -126,6 +129,7 @@ def bind_method(**config):
             if response['status'] == '503' or response['status'] == '429':
                 raise InstagramAPIError(response['status'], "Rate limited", "Your client is making too many request per second")
             try:
+                print("Received content: ", content)
                 content_obj = simplejson.loads(content)
             except ValueError:
                 raise InstagramClientError('Unable to parse response, not valid JSON.', status_code=response['status'])
@@ -181,6 +185,12 @@ def bind_method(**config):
                                                                                  self.path,
                                                                                  self.parameters,
                                                                                  include_secret=self.include_secret)
+            
+            print("Request URL:  ",url)
+            print("Method:  ",method)
+            print("Body:  ",body)
+            print("Headers:  ",headers)
+            
             if self.with_next_url:
                 return self._get_with_next_url(self.with_next_url, method, body, headers)
             if self.as_generator:
